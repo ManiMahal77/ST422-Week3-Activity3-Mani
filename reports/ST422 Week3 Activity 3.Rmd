@@ -34,23 +34,23 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, dev = "png"
 input_file <- 'st422_week3_subscription_v1.csv'
 
 # Loading the data
-raw_data_path <- file.path('../data/raw', input_file)
+raw_data_path <- file.path('data/raw', input_file)
 df <- import(raw_data_path)
 ```
 
-```{r}
+```{r include=FALSE}
 # Quick view of the data, using glimpse means that every column is shown
 glimpse(df)
 ```
 
 
-```{r}
+```{r include=FALSE}
 # Checking for missing values
 df %>%
   summarise(across(everything(), ~ sum(is.na(.x))))
 ```
 
-```{r}
+```{r include=FALSE}
 # Checking values for columns with data type character
 # Ensuring missing values are not labeled as Unknown, ? etc
 df %>% 
