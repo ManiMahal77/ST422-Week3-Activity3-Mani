@@ -1,0 +1,72 @@
+---
+title: "Subscription Churn Analysis"
+subtitle: "ST422 Week3 Activity 3"
+author: "Mani Mahal"
+date: "January 29, 2026"
+output: html_document
+---
+
+```{r}
+# This is the input file which can be switched between v1 and v2
+input_file <- 'st422_week3_subscription_v2.csv'
+
+# Loading the data
+raw_data_path <- file.path('../data/raw', input_file)
+df <- read.csv(raw_data_path)
+```
+
+
+```{r}
+# 1. Cleaning (Base R)
+df_clean <- df
+df_clean$churned_90d <- factor(df$churned_90d, levels = c(0, 1), labels = c("Active", "Churned"))
+
+# 2. Helpers
+get_cont <- function(x) sprintf("%.1f (%.1f)", mean(x, na.rm = TRUE), sd(x, na.rm = TRUE))
+get_cat <- function(x, level) {
+  n_val <- sum(x == level, na.rm = TRUE)
+  p_val <- (n_val / length(x)) * 100
+  sprintf("%d (%.0f%%)", n_val, p_val)
+}
+
+# 3. Data Groups
+grp_all <- df_clean
+grp_act <- df_clean[df_clean$churned_90d == "Active", ]
+grp_chu <- df_clean[df_clean$churned_90d == "Churned", ]
+
+# 4. Manual Print Function for Perfect Alignment
+cat("Table 1. Customer Demographics and Account Characteristics by Churn Status\n")
+# Multi-line Headers with manual padding
+fmt <- "%-25s %-5s %-15s %-15s %-15s\n"
+cat(sprintf(fmt, "Variable", "N", "Overall", "Active", "Churned"))
+cat(sprintf(fmt, "", "", paste0("N = ", nrow(grp_all)), paste0("N = ", nrow(grp_act)), paste0("N = ", nrow(grp_chu))))
+
+# Tenure
+cat(sprintf(fmt, "Tenure (Months)", sum(!is.na(df_clean$tenure_months)), get_cont(grp_all$tenure_months), get_cont(grp_act$tenure_months), get_cont(grp_chu$tenure_months)))
+
+# Monthly Fee
+cat(sprintf(fmt, "Monthly Fee (GBP)", sum(!is.na(df_clean$monthly_fee_gbp)), get_cont(grp_all$monthly_fee_gbp), get_cont(grp_act$monthly_fee_gbp), get_cont(grp_chu$monthly_fee_gbp)))
+
+# NPS Score & Unknown
+cat(sprintf(fmt, "NPS Score", sum(!is.na(df_clean$nps_score)), get_cont(grp_all$nps_score), get_cont(grp_act$nps_score), get_cont(grp_chu$nps_score)))
+cat(sprintf(fmt, "    Unknown", "", sum(is.na(grp_all$nps_score)), sum(is.na(grp_act$nps_score)), sum(is.na(grp_chu$nps_score))))
+
+# Region (Loop)
+cat(sprintf(fmt, "Region", sum(!is.na(df_clean$region)), "", "", ""))
+for(l in levels(factor(df_clean$region))) {
+  cat(sprintf(fmt, paste0("    ", l), "", get_cat(grp_all$region, l), get_cat(grp_act$region, l), get_cat(grp_chu$region, l)))
+}
+
+# Plan Type (Loop)
+cat(sprintf(fmt, "Plan Type", sum(!is.na(df_clean$plan_type)), "", "", ""))
+for(l in levels(factor(df_clean$plan_type))) {
+  cat(sprintf(fmt, paste0("    ", l), "", get_cat(grp_all$plan_type, l), get_cat(grp_act$plan_type, l), get_cat(grp_chu$plan_type, l)))
+}
+
+cat("\n1 Mean (SD); n (%)\n")
+cat("Data represents active subscriptions as of Jan 2026. NPS Score missingness indicates customers who did not respond to the survey.\n")
+
+```
+
+
+
