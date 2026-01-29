@@ -40,7 +40,7 @@ Follow these steps to reproduce the analysis on a new machine:
     *Note: This may take a few minutes to install the required packages.*
 4.  **Generate the report** by running:
     ```r
-    rmarkdown::render("reports/week3_report.Rmd")
+    rmarkdown::render("reports/ST422 Week3 Activity 3.Rmd")
     ```
 
 ## 5. Expected Outputs
