@@ -1,0 +1,157 @@
+---
+title: "Subscription Churn Analysis"
+subtitle: "ST422 Week3 Activity 3"
+author: "Mani Mahal"
+date: "January 29, 2026"
+output:
+  pdf_document:
+    pandoc_args: ["--listings"]
+  html_document:
+    df_print: paged
+header-includes:
+  - \lstset{breaklines=true}
+---
+
+The purpose of this report is to analyse customer subscription data to identify key characteristics associated with customer churn. Specifically, this analysis aims to:
+
+1.  **Characterise the sample:** Provide a summary of customer demographics and account details, stratified by churn status (Table 1).
+2.  **Visualise key drivers:** Explore the relationship between monthly fees, plan types, and regional churn rates.
+3.  **Ensure reproducibility:** Demonstrate a robust workflow that can be updated with new data versions (v1, v2, v3) with minimal manual intervention.
+
+```{r message=FALSE, warning=FALSE}
+#Installing requireed ppackages
+if (!require("pacman", quietly = TRUE)) {
+    install.packages("pacman")
+   library(pacman)
+}
+
+pacman::p_load('knitr','rio', 'readr', 'dplyr', 'ggplot2', 'gt', 'gtsummary', 'kableExtra', 'tidyverse')
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, dev = "png", dpi = 300)
+```
+
+```{r}
+# This is the input file which can be switched between v1 and v2
+input_file <- 'st422_week3_subscription_v1.csv'
+
+# Loading the data
+raw_data_path <- file.path('../data/raw', input_file)
+df <- import(raw_data_path)
+```
+
+```{r}
+# Quick view of the data, using glimpse means that every column is shown
+glimpse(df)
+```
+
+
+```{r}
+# Checking for missing values
+df %>%
+  summarise(across(everything(), ~ sum(is.na(.x))))
+```
+
+```{r}
+# Checking values for columns with data type character
+# Ensuring missing values are not labeled as Unknown, ? etc
+df %>% 
+  select(where(is.character)) %>% 
+  map(unique)
+```
+
+```{r}
+# Processing the data for table 1
+
+df_clean <- df %>%
+  mutate(
+    churned_90d = factor(churned_90d, levels = c(0, 1), labels = c("Active", "Churned")),
+    region = factor(region),
+    plan_type = factor(plan_type)
+  )
+```
+
+
+```{r results='asis'}
+# Generating the table 1
+
+t1 <- df_clean %>%
+  select(churned_90d, tenure_months, monthly_fee_gbp, nps_score, region, plan_type) %>%
+  tbl_summary(
+    by = churned_90d,                                   # Stratify by Churn
+    missing = "ifany",                                  # Explicit missingness
+    label = list(
+      tenure_months ~ "Tenure (Months)",
+      monthly_fee_gbp ~ "Monthly Fee (GBP)",
+      nps_score ~ "NPS Score",
+      region ~ "Region",
+      plan_type ~ "Plan Type"
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",               # Mean (SD) for symmetric
+      all_categorical() ~ "{n} ({p}%)"                  # n (%) for categorical
+    ),
+    digits = all_continuous() ~ 1                       # Precision to 1dp
+  ) %>%
+  add_overall() %>%                                     # Overall column
+  add_n() %>%                                           # Add N column
+  modify_header(label = "**Variable**") %>%
+  modify_caption("**Table 1. Customer Demographics and Account Characteristics by Churn Status**") %>%
+  as_gt() %>%
+  gt::tab_source_note(source_note = "Data represents active subscriptions as of Jan 2026. NPS Score missingness indicates customers who did not respond to the survey.")
+
+
+# Outputting the table for the report
+t1
+```
+
+
+```{r}
+# Saving the table 1 as table1.csv in /outputs/tables/
+
+table1_raw <- df_clean %>%
+  select(churned_90d, tenure_months, monthly_fee_gbp, nps_score, region, plan_type) %>%
+  tbl_summary(by = churned_90d) %>%
+  as_tibble()
+
+write_csv(table1_raw, "../outputs/tables/table1.csv")
+```
+
+
+```{r}
+# Plot of Monthly Fee Distribution by Plan Type
+
+p1 <- ggplot(df, aes(x = plan_type, y = monthly_fee_gbp, fill = plan_type)) +
+  geom_boxplot() +
+  labs(title = "Monthly Fee Distribution by Plan Type",
+       y = "Monthly Fee (GBP)", x = "Plan Type") +
+  theme_minimal()
+
+p1
+
+# Saving the plot as fig1_fee_dist.png in outputs/figures
+ggsave("../outputs/figures/fig1_fee_dist.png", plot = p1, width = 6, height = 4)
+```
+
+
+```{r}
+# Plot of Churn Rate by Region
+
+p2 <- ggplot(df, aes(x = region, fill = as.factor(churned_90d))) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion of Churn by Region",
+       y = "Proportion", x = "Region", fill = "Churn Status") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("grey", "red"), labels = c("Active", "Churned")) +
+  theme_minimal()
+
+p2
+
+# Saving the plot as fig2_churn_region.png in outputs/figures
+ggsave("../outputs/figures/fig2_churn_region.png", plot = p2, width = 6, height = 4)
+```
+
+
+
+
+
+
+

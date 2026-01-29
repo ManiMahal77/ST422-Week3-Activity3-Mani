@@ -1,0 +1,17 @@
+**Characteristic**,"**Active**  
+N = 55","**Churned**  
+N = 5"
+tenure_months,"21 (12, 29)","18 (8, 21)"
+monthly_fee_gbp,"19 (13, 21)","18 (13, 32)"
+nps_score,"18 (11, 23)","21 (17, 21)"
+Unknown,1,0
+region,NA,NA
+Midlands,15 (27%),1 (20%)
+North,7 (13%),1 (20%)
+Scotland,6 (11%),0 (0%)
+South,19 (35%),2 (40%)
+Wales,8 (15%),1 (20%)
+plan_type,NA,NA
+Basic,20 (36%),2 (40%)
+Premium,8 (15%),2 (40%)
+Standard,27 (49%),1 (20%)
