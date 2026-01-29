@@ -4,8 +4,6 @@ subtitle: "ST422 Week3 Activity 3"
 author: "Mani Mahal"
 date: "January 29, 2026"
 output:
-  pdf_document:
-    pandoc_args: ["--listings"]
   html_document:
     df_print: paged
 header-includes:
@@ -19,6 +17,8 @@ The purpose of this report is to analyse customer subscription data to identify 
 3.  **Ensure reproducibility:** Demonstrate a robust workflow that can be updated with new data versions (v1, v2, v3) with minimal manual intervention.
 
 ```{r message=FALSE, warning=FALSE}
+install.packages("data.table", type = "binary")
+
 #Installing requireed ppackages
 if (!require("pacman", quietly = TRUE)) {
     install.packages("pacman")
