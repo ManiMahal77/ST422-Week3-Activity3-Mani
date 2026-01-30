@@ -11,12 +11,12 @@ output: html_document
 input_file <- 'st422_week3_subscription_v2.csv'
 
 # Loading the data
-raw_data_path <- file.path('../data/raw', input_file)
+raw_data_path <- file.path('data/raw', input_file)
 df <- read.csv(raw_data_path)
 ```
 
 
-```{r}
+```{r, include=FALSE}
 # 1. Cleaning (Base R)
 df_clean <- df
 df_clean$churned_90d <- factor(df$churned_90d, levels = c(0, 1), labels = c("Active", "Churned"))
